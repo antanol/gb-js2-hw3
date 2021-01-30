@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ДЗ 3</title>
+    
+    <!-- Стили подключаем через лоадеры вебпака -->
+    <!-- <link rel="stylesheet" href="style/main.css"> -->
+    <!-- Подключение font-awesome -->
+    <script src="https://use.fontawesome.com/3a05ab18ac.js"></script>
+</head>
+<body>
+    <div class="tasks">
+        <div class="texttasks">
+            <h3>Задания:</h3>
+            <ol>
+                <li>Переделайте makeGETRequest() так, чтобы она использовала промисы.</li>
+                <li>
+                    Добавьте в соответствующие классы 
+                    методы добавления товара в корзину, 
+                    удаления товара из корзины 
+                    и получения списка товаров корзины.
+                </li>
+                <li>
+                    Переделайте GoodsList так, чтобы fetchGoods() возвращал промис, 
+                    а render() вызывался в обработчике этого промиса.
+                </li>
+            </ol>
+        </div>
+        <div class="answers">
+            <h3>Результат</h3>
+            <header>
+                <h1>Logo</h1>
+                <div class="basket">
+                    <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                    <div class="basketContent"></div>
+                    <div class="basketList"></div>
+                </div>
+            </header>
+            <div id="catalog"></div>
+        </div>
+    </div>
+
+    <script src="bundle.js"></script>
+</body>
+</html>
