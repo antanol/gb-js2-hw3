@@ -1,33 +1,71 @@
 // чтобы sass-loader корректно работал, указываем путь до файла scss
 import '../style/main.scss';
 
-function putInBasket(){
-    let alreadyExist = basket.content.find(item => {
-        if (item.name == this.name){
-            return true;
-        }
-    });
-    if (!alreadyExist){
-        basket.content.push(this);
-    };
-    if (!document.querySelector(".basketElem")) {
-        document.querySelector(".basketList").innerHTML = `<div class="basketElem"><img src="http://placehold.it/50x50">
-            <b>${this.name}</b>
-            <div class="price">${this.num}шт. на ${this.price*this.num} рублей</div></div>`;
-    }else{
-        document.querySelector(".basketList").innerHTML += `<div class="basketElem"><img src="http://placehold.it/50x50">
-            <b>${this.name}</b>
-            <div class="price">${this.num}шт. на ${this.price*this.num} рублей</div></div>`;
+const pathProductJSON = "https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/catalogData.json";
+
+class Product{
+    constructor(id, name, price, num=0){
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.num = num;
     }
-    basket.checkAmount(this.num);
+
+    render(){
+        return `<div class="productElem">
+                <img src="http://placehold.it/150x200">
+                <h4>${this.name}</h4>
+                <div class="price">${this.price} рублей</div>
+                <button data-id="${this.id}" class="btnMinus">-</button>
+                <input data-id="${this.id}" type="number" name="nunProd" value="1">
+                <button data-id="${this.id}" class="btnPlus">+</button><br>
+                <button data-id="${this.id}" class="btnBuyIt">Купить</button>
+            </div>`;
+    }
+}
+
+class CatalogPage{
+    constructor(container = '#catalog', content){
+        this.container = container;
+        this.content = [];
+        this._getContent()
+            .then(data => { //data - объект js
+                this.content = [...data];
+                this.renderPage();
+            });
+    }
+
+    _getContent(){
+        return fetch(pathProductJSON)
+            .then(result => result.json())
+            .catch(error => {
+                document.querySelector(this.container).innerHTML = `<h1>Что-то пошло не так...</h1> Простите, но мы не смогли найти товары. Пожалуйста, зайдите позже!`
+            })
+    }
+
+    renderPage(){
+        for (let elem of this.content){
+            let product = new Product(elem.id_product, elem.product_name, elem.price);
+            document.querySelector(this.container).innerHTML += product.render();
+        }
+    };
 }
 
 class Basket{
     constructor(content=[], amount=0){
         this.content = content;
         this.amount = amount;
+        this.startState();
     }
     
+    startState(){
+        // стартовое состояние 
+        if (this.amount == 0){
+            document.querySelector(".basketContent").innerHTML = `0 рублей`;
+            document.querySelector(".basketList").innerHTML = `Ваша корзина пуста`;
+        }
+    };
+
     checkAmount(num){
         let temp_count = 0;
         for (let i=0; i<this.content.length; i++){
@@ -37,62 +75,32 @@ class Basket{
         this.amount = temp_count;
         document.querySelector(".basketContent").innerHTML = `${this.amount} рублей`
     }
-};
 
-let Products = [
-    {
-        name: 'Notebook',
-        id: 1,
-        price: 2000,
-        num: 0
-    },
-    {
-        name: 'Mouse',
-        id: 2,
-        price: 20,
-        num: 0
-    },
-    {
-        name: 'Keyboard',
-        id: 3,
-        price: 200,
-        num: 0
-    },
-    {
-        name: 'Gamepad',
-        id: 4,
-        price: 50,
-        num: 0
-}];
-
-let basket = new Basket();
-
-// стартовое состояние 
-if (basket.amount == 0){
-    document.querySelector(".basketContent").innerHTML = `0 рублей`;
-    document.querySelector(".basketList").innerHTML = `Ваша корзина пуста`;
-}
-
-//Функция для формирования верстки каждого товара
-const renderProduct = (elem = Products[0], i = 0) => {
-    return `<div class="productElem">
-                <img src="http://placehold.it/150x200">
-                <h4>${elem.name}</h4>
-                <div class="price">${elem.price} рублей</div>
-                <button data-id="${i}" class="btnMinus">-</button>
-                <input data-id="${i}" type="number" name="nunProd" value="1">
-                <button data-id="${i}" class="btnPlus">+</button><br>
-                <button data-id="${i}" class="btnBuyIt">Купить</button>
-            </div>`;
-};
-
-const renderPage = (list) => {
-    const newCatalog = list.map((item, index) => renderProduct(item, index));
-    for (let elem of newCatalog){
-        document.getElementById("catalog").innerHTML += elem;
+    putInBasket(newElem){
+        let alreadyExist = this.content.find(item => {
+            if (item.name == newElem.name){
+                return true;
+            }
+        });
+        if (!alreadyExist){
+            this.content.push(newElem);
+        };
+        let basketGoods =  `<div class="basketElem">
+                                <img src="http://placehold.it/50x50">
+                                <b>${newElem.name}</b>
+                                <div class="price">${newElem.num}шт. на ${newElem.price*newElem.num} рублей</div>
+                            </div>`;
+        if (!document.querySelector(".basketElem")) {
+            document.querySelector(".basketList").innerHTML = basketGoods;
+        }else{
+            document.querySelector(".basketList").innerHTML += basketGoods;
+        }
+        this.checkAmount(newElem.num);
     }
 };
-renderPage(Products);
+
+let basket = new Basket();
+let catalog = new CatalogPage();
 
 // обработка кнопок
 let btnsMinus = document.querySelectorAll('.btnMinus'),
@@ -114,10 +122,10 @@ for (let btn of btnsPlus){
 
 for (let btn of btnsBuy){
     btn.addEventListener('click', (event)=>{
-        Products[event.target.dataset.id].num += Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
+        catalog.content[event.target.dataset.id].num += Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
         // ранее функция была в каждом объекте. Изучим конструкторы - запихну в него.
         // Но т.к. в объекте this относился к объекту, здесь пришлось изменить контекст с помощью бинда.
-        let putThis = putInBasket.bind(Products[event.target.dataset.id]);
+        let putThis = putInBasket(Products[event.target.dataset.id]);
         putThis();
     });
 }
