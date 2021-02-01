@@ -2,13 +2,14 @@
 import '../style/main.scss';
 
 const pathProductJSON = "https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/catalogData.json";
+const pathBasketContentJSON = "https://raw.githubusercontent.com/GeekBrainsTutorial/online-store-api/master/responses/getBasket.json";
 
 class Product{
-    constructor(id_product, name, price, num=0){
+    constructor(id_product, name, price, quantity=0){
         this.id_product = id_product;
         this.name = name;
         this.price = price;
-        this.num = num;
+        this.quantity = quantity;
     }
 
     render(){
@@ -73,10 +74,10 @@ class CatalogPage{
         for (let btn of btnsBuy){
             btn.addEventListener('click', (event)=>{
                 let buyingElem =  this.content.find(item => item.id_product === Number(event.target.dataset.id));
-                if (!buyingElem.num){
-                    buyingElem.num = Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
+                if (!buyingElem.quantity){
+                    buyingElem.quantity = Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
                 }else{
-                    buyingElem.num += Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
+                    buyingElem.quantity += Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
                 }
 
                 basket.putInBasket(buyingElem);
@@ -109,10 +110,10 @@ class Basket{
         });
     };
 
-    checkAmount(num){
+    checkAmount(quantity){
         let temp_count = 0;
         for (let i=0; i<this.content.length; i++){
-            temp_count += num * this.content[i].price;
+            temp_count += quantity * this.content[i].price;
         }
 
         this.amount = temp_count;
@@ -127,7 +128,7 @@ class Basket{
         let basketGoods =  `<div class="basketElem" data-id="${newElem.id_product}">
                                 <img src="http://placehold.it/50x50">
                                 <b>${newElem.product_name}</b>
-                                <div class="price">${newElem.num}шт. на ${newElem.price*newElem.num} рублей</div>
+                                <div class="price">${newElem.quantity}шт. на ${newElem.price*newElem.quantity} рублей</div>
                             </div>`;
         let oldNumGoods = document.querySelector(`.basketElem[data-id="${newElem.id_product}"]`);
         if (oldNumGoods){
@@ -138,7 +139,7 @@ class Basket{
         }else{
             document.querySelector(".basketList").innerHTML += basketGoods;
         }
-        this.checkAmount(newElem.num);
+        this.checkAmount(newElem.quantity);
     }
 };
 
