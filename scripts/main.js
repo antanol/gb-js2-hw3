@@ -87,28 +87,51 @@ class CatalogPage{
 }
 
 class Basket{
-    constructor(content=[], amount=0){
-        this.content = content;
-        this.amount = amount;
-        this.startState();
+    constructor(content=[], amount=0, countGoods=0){
+        this._getContent()
+            .then(data => {
+                this.content = data.contents;
+                this.amount = data.amount;
+                this.countGoods = data.countGoods;
+                this.startState();
+            })
+            .catch(err=>{
+                // если файлик не найден, берём пустую корзину
+                this.content = [];
+                this.amount = amount;
+                this.countGoods = this.countGoods;
+                this.startState();
+            });
+    }
+
+    _getContent(){
+        return fetch(pathBasketContentJSON)
+            .then(result => result.json())
+            .catch(error => {
+                console.log(error);
+            })
     }
     
     startState(){
-        // стартовое состояние 
+        // если не было чекпоинта, т.е. если pathBasketContentJSON пуст
         if (this.amount == 0){
             document.querySelector(".basketContent").innerHTML = `0 рублей`;
             document.querySelector(".basketList").innerHTML = `Ваша корзина пуста`;
+        }else{
+            document.querySelector(".basketContent").innerHTML = `${this.amount} рублей`;
+            for (let elem of this.content){
+                document.querySelector(".basketList").innerHTML += this.render(elem);
+            }
         }
 
         this.listeners();
-    };
-
+    }
 
     listeners(){
         document.querySelector('.basket').addEventListener('click', ()=>{
             document.querySelector('.basketList').classList.toggle("visible");
         });
-    };
+    }
 
     checkAmount(quantity){
         let temp_count = 0;
@@ -117,7 +140,16 @@ class Basket{
         }
 
         this.amount = temp_count;
+        this.countGoods += this
         document.querySelector(".basketContent").innerHTML = `${this.amount} рублей`
+    }
+
+    render(elem){
+        return `<div class="basketElem" data-id="${elem.id_product}">
+                    <img src="http://placehold.it/50x50">
+                    <b>${elem.product_name}</b>
+                    <div class="price">${elem.quantity}шт. на ${elem.price*elem.quantity} рублей</div>
+                </div>`;
     }
 
     putInBasket(newElem){
@@ -125,11 +157,7 @@ class Basket{
         if (!alreadyExist){
             this.content.push(newElem);
         };
-        let basketGoods =  `<div class="basketElem" data-id="${newElem.id_product}">
-                                <img src="http://placehold.it/50x50">
-                                <b>${newElem.product_name}</b>
-                                <div class="price">${newElem.quantity}шт. на ${newElem.price*newElem.quantity} рублей</div>
-                            </div>`;
+        let basketGoods = this.render(newElem);
         let oldNumGoods = document.querySelector(`.basketElem[data-id="${newElem.id_product}"]`);
         if (oldNumGoods){
             oldNumGoods.remove();
