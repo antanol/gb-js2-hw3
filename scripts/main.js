@@ -73,14 +73,17 @@ class CatalogPage{
 
         for (let btn of btnsBuy){
             btn.addEventListener('click', (event)=>{
+                console.log(basket);
                 let buyingElem =  this.content.find(item => item.id_product === Number(event.target.dataset.id));
+                console.log(buyingElem);
+                let newNum = Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
                 if (!buyingElem.quantity){
-                    buyingElem.quantity = Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
+                    buyingElem.quantity = newNum;
                 }else{
-                    buyingElem.quantity += Number(document.querySelector(`input[data-id="${event.target.dataset.id}"]`).value);
+                    buyingElem.quantity += newNum;
                 }
 
-                basket.putInBasket(buyingElem);
+                basket.putInBasket(buyingElem, newNum);
             });
         }
     }
@@ -133,14 +136,15 @@ class Basket{
         });
     }
 
-    checkAmount(quantity){
+    checkAmount(elem, quantity){
         let temp_count = 0;
-        for (let i=0; i<this.content.length; i++){
-            temp_count += quantity * this.content[i].price;
-        }
+        // for (let i=0; i<this.content.length; i++){
+        //     temp_count += quantity * this.content[i].price;
+        // }
+        temp_count = this.amount + elem.price * quantity;
 
         this.amount = temp_count;
-        this.countGoods += this
+        this.countGoods += quantity;
         document.querySelector(".basketContent").innerHTML = `${this.amount} рублей`
     }
 
@@ -152,7 +156,7 @@ class Basket{
                 </div>`;
     }
 
-    putInBasket(newElem){
+    putInBasket(newElem, newNum){
         let alreadyExist = this.content.find(item => item.product_name == newElem.product_name);
         if (!alreadyExist){
             this.content.push(newElem);
@@ -167,7 +171,7 @@ class Basket{
         }else{
             document.querySelector(".basketList").innerHTML += basketGoods;
         }
-        this.checkAmount(newElem.quantity);
+        this.checkAmount(newElem, newNum);
     }
 };
 
