@@ -13,7 +13,7 @@ class Product{
     }
 
     render(){
-        return `<div class="productElem">
+        return `<div data-id="${this.id_product}" class="productElem">
                 <img src="http://placehold.it/150x200">
                 <h4>${this.name}</h4>
                 <div class="price">${this.price} рублей</div>
@@ -51,6 +51,19 @@ class CatalogPage{
             document.querySelector(this.container).innerHTML += product.render();
         }
     }
+    
+    filter(value){
+        const regexp = new RegExp(value, 'i');
+        this.filtered = this.content.filter(product => regexp.test(product.product_name));
+        this.content.forEach(el => {
+            const block = document.querySelector(`.productElem[data-id="${el.id_product}"]`);
+            if(!this.filtered.includes(el)){
+                block.classList.add('hidden-screen');
+            } else {
+                block.classList.remove('hidden-screen');
+            }
+        })
+    }
 
     listeners(){
         // обработка кнопок
@@ -86,6 +99,12 @@ class CatalogPage{
                 basket.putInBasket(buyingElem, newNum);
             });
         }
+
+        document.querySelector('.search-form').addEventListener('submit', e => {
+            // если событие не обрабатывается явно, его действие по умолчанию не должно выполняться так, как обычно
+            e.preventDefault();
+            this.filter(document.querySelector('.search-field').value);
+        })
     }
 }
 

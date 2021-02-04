@@ -39,6 +39,10 @@ body{
         grid-row-start: 1;
         grid-row-end: 3;
     }
+    
+    .hidden-screen{
+        display: none !important;
+    }
 
     header{
         background-color: darkred;
@@ -53,8 +57,18 @@ body{
 
         display: flex;
         justify-content: space-between;
+        align-items: center;
 
         position: relative;
+
+        .btn-search{
+            padding: 0;
+
+            background: none;
+            color: white;
+
+            border: none;
+        }
 
         .basket{
             display: flex;
@@ -209,10 +223,6 @@ body{
 section{
     hr{
         margin: 0 0 10px 0;
-    }
-
-    &.hidden-screen{
-        display: none;
     }
 
     label{
